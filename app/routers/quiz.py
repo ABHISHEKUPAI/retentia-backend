@@ -13,6 +13,11 @@ from app.dependencies import get_current_user
 from app.models import User
 from app.schemas.quiz import QuizResponse, QuizQuestion, QuizQuestionSafe, Subject, QUIZ_RESPONSE_SCHEMA
 
+from app.crud import syllabus as syllabus_crud
+from app.database import get_db
+from app.schemas.syllabus import SubjectOut
+from sqlalchemy.orm import Session
+
 load_dotenv()
 
 def get_genai_client():
@@ -25,6 +30,10 @@ def get_genai_client():
     return genai.Client(api_key=api_key)
 
 router = APIRouter(prefix="/quiz", tags=["Quiz"])
+
+@router.get("/syllabus", response_model=List[SubjectOut])
+def get_syllabus(db: Session = Depends(get_db)):
+    return syllabus_crud.get_syllabus(db)
 
 @router.post("/generate-quiz", response_model=QuizResponse)
 def generate_quiz(data: List[Subject], current_user: User = Depends(get_current_user)):
